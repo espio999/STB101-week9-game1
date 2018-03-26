@@ -1,0 +1,68 @@
+---
+title: "Population per Industries vs family home volumes"
+output: html_notebook
+---
+
+```{r setup}
+library(readxl)
+Book1 <- read_excel("Book1.xlsx", range = "c5:f22")
+df = data.frame(Book1)
+
+drawPlot1 = function(val, clr){
+  x = c(1:17)
+  
+  plot(x, val, ylim=c(0, 4600), col=clr)
+  par(new=T)
+}
+
+makeVector = function(val){
+  len = 17
+  ret = c()
+
+  for (i in 1:len){
+    ret = c(ret, calc(val[i,]))
+  }
+  
+  return(ret)
+}
+
+calc = function(p){
+  a = 1.97872
+  b = 0.50356
+  c = 0.17690
+  d = 49.87892
+  
+  return(a*p$x + b*p$u + c*p$v + d)
+}
+
+drawPlot2 = function(val){
+  x = c(1:17)
+  
+  plot(x, val, ylim=c(0, 4600), col="black", type = "l")
+}
+```
+
+## 1. Obtain regression equation
+```{r}
+ret = lm(df$y~., data=df)
+summary(ret)
+```
+## 2. Evaluate effectiveness of equation and significance of regression coefficients
+```{r}
+drawPlot1(df$x, "red")
+drawPlot1(df$u, "green")
+drawPlot1(df$v, "blue")
+drawPlot1(df$y, "black")
+drawPlot2(makeVector(df))
+```
+## 3. Predict family home for new prefecture A with x=98, u=450,v=88
+```{r}
+tmp = data.frame(
+  x = 98,
+  u = 450,
+  v = 88
+)
+
+answer = calc(tmp)
+```
+predicted family home = `r answer`
